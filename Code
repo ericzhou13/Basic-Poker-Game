@@ -1,0 +1,374 @@
+import random
+import sys
+import os
+suits = ['♣', '♦', '♥', '♠']
+deck = []
+players = []
+trashDeck = []
+
+class card:
+    def __init__(self, num, suit):
+        self.num = num#this is the num
+        self.suit = suit#this is the symbol
+        self.visibleCard = [self.num, self.suit]#this is the card itself
+        self.card1 = "".join(self.visibleCard)#this is what is displayed to the player
+    def counting(self, i):
+        self.visibleCard.count(i)
+
+
+class table:
+    def __init__(self, ante):
+        self.ante = ante # ante
+        self.pot = 0 #pot
+        self.center = [] # center cards
+        self.Raise = 0 # Raise Value
+    def flop(self): #places 3 cards in the center
+        for i in range(0,3):
+            card = random.choice(deck)
+            self.center.append(card)
+            deck.remove(card)
+    def NewCenterCard(self): # places new card in center
+        card = random.choice(deck)
+        self.center.append(card)
+        deck.remove(card)
+
+    def addante(self): #remove the ante and put it into the pot for each player
+        for player in players:
+            player.balance -= self.ante
+            self.pot += self.ante
+    def PlayerHandStart(self):#create a hand for all the players
+        for player in players:
+            for i in range(0,2):
+                card = random.choice(deck)
+                player.hand.append(card)
+                deck.remove(card)#removes card
+
+
+class player:
+    def __init__(self, name):
+        self.name = name
+        self.balance = 100
+        self.hand = []#hand with symbols
+        self.secondhand = [] #hand with all numbers
+        self.isPlaying = True
+        self.winCon = 0
+    def PogChamps(self):
+         pass
+
+    def FoldCheckRaise(self, action):#this is the Fold Check Raise Action
+        if action == "Fold" and self.isPlaying:
+            self.isPlaying = False
+        elif action == "Check" and self.isPlaying:
+            pass
+        elif action == "Raise" and self.isPlaying:
+            action = input("How much do you want to Raise: ")
+            table1.Raise += int(action)
+            self.RaiseAction()
+            for player in players:
+                if player.isPlaying:
+                    player.balance -= table1.Raise
+                    table1.pot += table1.Raise
+        else:
+            self.FoldCheckRaise(input("That is not an option please retry: "))
+    def RaiseAction(self):#this is when someone wants to Raise and repeats itself
+        for player in players:
+            if player != self and player.isPlaying:
+                action = input("It is " + player.name + "'s turn. Will you Call Fold or Raise?")
+                if action == "Call":
+                    pass
+                elif action == "Fold":
+                    player.isPlaying = False
+                elif action == "Raise":
+                    action = input("How much do you want to Raise:")
+                    table1.Raise += int(action)
+                    player.RaiseAction()
+                    break
+
+
+def RoyalFlush(player):
+    tempList = player.secondhand.copy()
+    suit = ""
+    for i in range(0,4):
+        count = 0
+        for card in tempList:
+            count += card.count(suits[i])
+        if count >= 5:
+            suit = suits[i]
+            break
+        else:
+            pass
+    for card in tempList:
+        if card[1] != suit:
+            tempList.remove(card)
+        else:
+            pass
+    count1 = 0
+    for card in tempList:
+        if int(card[0]) == 10 or int(card[0]) == 11 or int(card[0]) == 12 or int(card[0]) == 13 or int(card[0]) == 14:
+            count1 += 1
+    if count1 == 5:
+        player.winCon = 9
+        return
+    else:
+        StraightFlush(player)#Royal Flush
+def StraightFlush(player):
+    tempList = player.secondhand.copy()
+    suit = ""
+    for i in range(0, 4):
+        count = 0
+        for card in tempList:
+            count += card.count(suits[i])
+        if count >= 5:
+            suit = suits[i]
+            break
+        else:
+            pass
+    for card in tempList:
+        if card[1] != suit:
+            tempList.remove(card)
+        else:
+            pass
+
+    count1 = 0
+    for i in range(1, len(tempList)):
+        if int(tempList[i - 1][0]) + 1 == int(tempList[i][0]):
+            count1 += 1
+        else:
+            count1 = 0
+
+        if count1 == 4:
+            player.winCon = 8
+            break
+    if player.winCon == 8:
+        return
+    else:
+        FourOfAKind(player)
+def FourOfAKind(player):
+    tempList = player.secondhand.copy()
+    for i in range(0,len(tempList) - 4):
+        if int(tempList[i][0]) == int(tempList[i + 1][0]) and int(tempList[i][0]) == int(tempList[i + 2][0]) and int(tempList[i][0]) == int(tempList[i + 3][0]):
+            player.winCon = 7
+    if player.winCon == 7:
+        return
+    else:
+
+        FullHouse(player)
+def FullHouse(player):
+    tempList = player.secondhand.copy()
+    for i in range(0,len(tempList) - 4):
+        if int(tempList[i][0]) == int(tempList[i + 1][0]) and int(tempList[i + 1][0]) == int(tempList[i + 2][0]) and int(tempList[i + 3][0]) == int(tempList [i + 4][0]) and int(tempList[i + 2][0]) != int(tempList[i + 3][0]):
+            player.winCon = 6
+            break
+        elif int(tempList[i][0]) == int(tempList[i + 1][0]) and int(tempList[i + 2][0]) == int(tempList[i + 3][0]) and int(tempList[i + 3][0]) == int(tempList [i + 4][0]) and int(tempList[i + 1][0]) != int(tempList[i + 2][0]):
+            player.winCon = 6
+            break
+        else:
+            player.winCon = 0
+    if player.winCon == 6:
+        return
+    else:
+
+        Flush(player)
+def Flush(player):
+    tempList = player.secondhand.copy()
+    for i in range(0, 4):
+        count = 0
+        for card in tempList:
+            count += card.count(suits[i])
+        if count >= 5:
+            player.winCon = 5
+            break
+        else:
+            pass
+    if player.winCon == 5:
+        return
+    else:
+        Straight(player)
+def Straight(player):
+    tempList = player.secondhand.copy()
+    count = 0
+    for i in range(1, len(tempList)):
+        if int(tempList[i - 1][0]) + 1 == int(tempList[i][0]):
+            count += 1
+        else:
+            count -= 1
+        if count >= 4:
+            player.winCon = 4
+    if player.winCon == 4:
+        return
+    else:
+        ThreeOfAKind(player)
+def ThreeOfAKind(player):
+    tempList = player.secondhand.copy()
+    for i in range(0, len(tempList) - 3):
+        if int(tempList[i][0]) == int(tempList[i + 1][0]) and int(tempList[i][0]) == int(tempList[i + 2][0]):
+            player.winCon = 3
+    if player.winCon == 3:
+        return
+    else:
+
+        TwoPairs(player)
+def TwoPairs(player):
+    tempList = player.secondhand.copy()
+    PairCount = 0
+    for i in range(1,len(tempList)):
+        if int(tempList[i - 1][0]) == int(tempList[i][0]):
+            PairCount += 1
+    if PairCount >= 2:
+        player.winCon = 2
+    if player.winCon == 2:
+        return
+    else:
+
+        Pair(player)
+def Pair(player):
+    tempList = player.secondhand.copy()
+    PairCount = 0
+    for i in range(1, len(tempList)):
+        if int(tempList[i - 1][0]) == int(tempList[i][0]):
+            PairCount += 1
+    if PairCount >= 1 :
+        player.winCon = 1
+    if player.winCon == 1:
+        return
+    else:
+
+        player.winCon = 0
+def WinCheck():
+    tempList = players.copy()
+    TotalPoints = []
+    for player in tempList:
+        TotalPoints.append(player.winCon)
+    print(TotalPoints)
+    Highest = max(TotalPoints)
+    print(Highest)
+    for player in tempList:
+        if player.winCon != Highest:
+            tempList.remove(player)
+    print(tempList)
+    #distributes Pot
+    if len(tempList) > 1:
+        NewPot = table1.pot/len(tempList)
+        for player in tempList:
+            player.balance += NewPot
+    else:
+        tempList[0].balance += table1.pot
+    table1.pot = 0
+    for player in players:
+        print(player.name, player.balance)
+
+#Checks which card is the best
+#splits pot if tie exists
+
+
+def cardConverter():#converts symbols into numbers to be compared
+    for player in players:
+        tempDeck = []
+        hand = player.hand
+        for card in hand:
+            tempDeck.append(card)
+        for card in table1.center:
+            tempDeck.append(card)
+
+        for i in range(0,len(tempDeck)):
+            player.secondhand.append(tempDeck[i].visibleCard)
+
+        for card in player.secondhand:
+            if card[0] == "J":
+                card[0] = 11
+            elif card[0] == "Q":
+                card[0] = 12
+            elif card[0] == "K":
+                card[0] = 13
+            elif card[0] == "A":
+                card[0] = 14
+            else:
+                card[0] = int(card[0])
+
+
+        player.secondhand = sorted(player.secondhand, key = lambda number:number[0])
+        print(player.secondhand)
+
+def Trash():
+    #This clears out all the cards in his hand and removes it from the main deck
+    for player in players:
+        player.hand.clear()
+    #this is for clearing the table cards
+    table1.center.clear()
+
+"""
+second hand is the one with all full numbers used for comparison
+hand is the actual hand with the symbols (J,Q,K,A)
+"""
+
+
+
+
+
+def deckcreate():#creates a deck
+    for i in range(2,15):#value is the actual numerical value of the card while num is just what the player sees and the symbols
+        value = i
+        if value == 11:
+            num = "J"
+        elif value == 12:
+            num = "Q"
+        elif value == 13:
+            num = "K"
+        elif value == 14:
+            num = "A"
+        else:
+            num = str(i)
+        for cardType in suits:
+            suit = cardType
+            NewCard = card(num, suit)
+            deck.append(NewCard)
+        random.shuffle(deck)
+
+
+
+player1 = player("player1")
+player2 = player("player2")
+player3 = player("player3")
+players = [player1, player2, player3]
+table1 = table(10)
+#main loop
+deckcreate()
+while 1 > 0:
+    table1.flop()
+    table1.PlayerHandStart()
+    table1.addante()
+
+    for player in players:
+        print(player.name, player.balance)
+    for player in players:  # prints players cards
+        if player.isPlaying:
+            print(player.name + "'s hand " + str(player.hand[0].card1) + str(player.hand[1].card1))
+
+    for i in range(0,2):
+        for x in range(0,len(table1.center)):
+            print(str(table1.center[x].card1), end = '')
+        print(" This is the pot: " + str(table1.pot))#prints center and pot
+
+        for player in players:#FoldCheckRaise actions
+            if player.isPlaying:
+                player.FoldCheckRaise(input("It is " + player.name + "'s turn. Will you Fold, Check, or Raise" ))
+
+        table1.NewCenterCard()#new centercard
+    for x in range(0,len(table1.center)):
+        print(str(table1.center[x].card1), end = '')
+    print(" This is the pot: " + str(table1.pot))
+    for player in players:
+        if player.isPlaying:
+            player.FoldCheckRaise(input("It is " + player.name + "'s turn. Will you Fold, Check, or Raise" ))
+    for x in range(0,len(table1.center)):
+            print(str(table1.center[x].visibleCard), end = '')
+
+    print("")
+    cardConverter()
+
+    for player in players:
+        RoyalFlush(player)
+
+
+    WinCheck()
+    Trash()
