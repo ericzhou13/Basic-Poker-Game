@@ -295,7 +295,10 @@ def Trash():
         player.hand.clear()
     #this is for clearing the table cards
     table1.center.clear()
-
+    print(deck)
+    print(table1.center)
+    for player in players:
+        print(player.name, player.hand)
 """
 second hand is the one with all full numbers used for comparison
 hand is the actual hand with the symbols (J,Q,K,A)
@@ -342,11 +345,11 @@ while 1 > 0:
         print(player.name, player.balance)
     for player in players:  # prints players cards
         if player.isPlaying:
-            print(player.name + "'s hand " + str(player.hand[0].card1) + str(player.hand[1].card1))
+            print(player.name + "'s hand " + str(player.hand[0].visibleCard) + str(player.hand[1].visibleCard))
 
     for i in range(0,2):
         for x in range(0,len(table1.center)):
-            print(str(table1.center[x].card1), end = '')
+            print(str(table1.center[x].visibleCard), end = '')
         print(" This is the pot: " + str(table1.pot))#prints center and pot
 
         for player in players:#FoldCheckRaise actions
@@ -355,7 +358,7 @@ while 1 > 0:
 
         table1.NewCenterCard()#new centercard
     for x in range(0,len(table1.center)):
-        print(str(table1.center[x].card1), end = '')
+        print(str(table1.center[x].visibleCard), end = '')
     print(" This is the pot: " + str(table1.pot))
     for player in players:
         if player.isPlaying:
