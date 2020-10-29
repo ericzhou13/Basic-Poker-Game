@@ -6,10 +6,10 @@ deck = []
 players = []
 trashDeck = []
 
-class card:
+class card:#this is the formula that all cards will follow
     def __init__(self, num, suit):
-        self.num = num#this is the num
-        self.suit = suit#this is the symbol
+        self.num = num#this is the numerical value of the card
+        self.suit = suit#this is the symbol of the card
         self.visibleCard = [self.num, self.suit]#this is the card itself
         self.card1 = "".join(self.visibleCard)#this is what is displayed to the player
     def counting(self, i):
@@ -20,7 +20,7 @@ class table:
     def __init__(self, ante):
         self.ante = ante # ante
         self.pot = 0 #pot
-        self.center = [] # center cards
+        self.center = [] # This represents the center and holds all the center cards
         self.Raise = 0 # Raise Value
     def flop(self): #places 3 cards in the center
         for i in range(0,3):
@@ -52,8 +52,7 @@ class player:
         self.secondhand = [] #hand with all numbers
         self.isPlaying = True
         self.winCon = 0
-    def PogChamps(self):
-         pass
+
 
     def FoldCheckRaise(self, action):#this is the Fold Check Raise Action
         if action == "Fold" and self.isPlaying:
@@ -84,7 +83,7 @@ class player:
                     player.RaiseAction()
                     break
 
-
+#the following set of functions calculates which type of hand each player has.
 def RoyalFlush(player):
     tempList = player.secondhand.copy()
     suit = ""
@@ -234,7 +233,7 @@ def Pair(player):
     else:
 
         player.winCon = 0
-def WinCheck():
+def WinCheck():Checks who the winner is
     tempList = players.copy()
     TotalPoints = []
     for player in tempList:
@@ -246,8 +245,7 @@ def WinCheck():
         if player.winCon != Highest:
             tempList.remove(player)
     print(tempList)
-    #distributes Pot
-    if len(tempList) > 1:
+    if len(tempList) > 1: #if two or more players have the same hand then the pot is split between them
         NewPot = table1.pot/len(tempList)
         for player in tempList:
             player.balance += NewPot
@@ -257,8 +255,7 @@ def WinCheck():
     for player in players:
         print(player.name, player.balance)
 
-#Checks which card is the best
-#splits pot if tie exists
+
 
 
 def cardConverter():#converts symbols into numbers to be compared
@@ -289,8 +286,7 @@ def cardConverter():#converts symbols into numbers to be compared
         player.secondhand = sorted(player.secondhand, key = lambda number:number[0])
         print(player.secondhand)
 
-def Trash():
-    #This clears out all the cards in his hand and removes it from the main deck
+def Trash():#This clears out all the cards in his hand and removes it from the main deck
     for player in players:
         player.hand.clear()
     #this is for clearing the table cards
